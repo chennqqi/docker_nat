@@ -1,0 +1,19 @@
+FROM alpine
+LABEL maintainer "q@shellpub.com"
+ARG app_name=docker_nat
+
+RUN set -x \
+  && echo "===> build ${app_name}..." \
+  && apk --update add ca-certificates curl \
+  && apk --update add --no-cache -t .build-deps \
+	tini \
+	su-exec \
+  && echo "===> Building hmbd daemon..." \
+  && apk del --purge .build-deps
+
+## fix golang link
+RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+
+# Add hmb soft 
+COPY ${app_name} /usr/bin/
+ENTRYPOINT ["docker_nat"]
